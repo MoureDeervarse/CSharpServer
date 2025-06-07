@@ -28,7 +28,10 @@ Thumbs.db
 *.log
 
 ## Entity Framework Migrations
-Migrations/
+# Migrations/
+
+# Docker volumes can be large and are often not needed in source control
+volumes/
 
 ## NuGet packages
 *.nupkg
