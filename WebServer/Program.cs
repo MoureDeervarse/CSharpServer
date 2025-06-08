@@ -54,7 +54,7 @@ app.MapGet("/weatherforecast", () =>
 
 app.MapGet("/test", async (AppDbContext db) =>
 {
-    var examples = await db.Examples.ToListAsync();
+    var examples = await db.Accounts.ToListAsync();
     return Results.Ok(examples);
 })
 .WithName("GetTest");
