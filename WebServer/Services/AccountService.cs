@@ -41,20 +41,25 @@ namespace WebServer.Services
             return _socialInfoRepo.GetAll();
         }
 
-        public async Task<ErrorCode> CreateAccountAsync(CreateAccountDto dto)
+        public async Task<ApiResponse> CreateAccountAsync(CreateAccountDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password)) {
+                return new ApiResponse(ErrorCode.InvalidInput);
+            }
+            
             if (await _db.Accounts.AnyAsync(a => a.Email == dto.Email))
-                return ErrorCode.EmailAlreadyExists;
+            {
+                return new ApiResponse(ErrorCode.EmailAlreadyExists);
+            }
 
-            var model = new AccountModel
+            _db.Accounts.Add(new AccountModel
             {
                 Email = dto.Email,
                 Password = dto.Password
-            };
-
-            _db.Accounts.Add(model);
+            });
             await _db.SaveChangesAsync();
-            return ErrorCode.None;
+
+            return ApiResponse.SUCCESS;
         }
     }
 }
