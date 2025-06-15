@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using WebServer.Data;
 using WebServer.Models;
+using WebServer.Repositories;
+using WebServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
 
 // Add DbContext with MySQL connection
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -15,6 +18,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     )
 );
+
+builder.Services.AddScoped<AccountRepository>();
+builder.Services.AddScoped<AccountService>();
 
 var app = builder.Build();
 
@@ -59,6 +65,7 @@ app.MapGet("/test", async (AppDbContext db) =>
 })
 .WithName("GetTest");
 
+app.MapControllers();
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

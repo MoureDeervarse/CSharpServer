@@ -6,7 +6,7 @@ namespace WebServer.Models
     public class AccountModel : BaseEntity
     {
         [Key]
-        public uint UserId { get; set; }
+        public int UserId { get; set; }
 
         [Required]
         [MaxLength(320)]

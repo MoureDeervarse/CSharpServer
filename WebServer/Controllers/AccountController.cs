@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using WebServer.Common;
+
 using WebServer.DTOs;
-using WebServer.Models;
 using WebServer.Services;
 
 namespace WebServer.Controllers
@@ -20,7 +19,14 @@ namespace WebServer.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto dto)
         {
-            var result = await _accountService.CreateAccountAsync(dto);
+            var result = await _accountService.CreateAccount(dto);
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllAccounts()
+        {
+            var result = await _accountService.GetAllAccounts();
             return new JsonResult(result);
         }
     }

@@ -1,64 +1,61 @@
-using WebServer.Models;
-using WebServer.Repositories;
-using System.Collections.Generic;
-using WebServer.Data;
-using Microsoft.EntityFrameworkCore;
 using WebServer.DTOs;
+using WebServer.Models;
 using WebServer.Common;
+using WebServer.Repositories;
 
 namespace WebServer.Services
 {
     public class AccountService
     {
-        private readonly IAccountRepository _accountRepo;
-        private readonly IDeviceInfoRepository _deviceInfoRepo;
-        private readonly ISocialInfoRepository _socialInfoRepo;
-        private readonly AppDbContext _db;
+        private readonly AccountRepository _accountRepository;
 
-        public AccountService(IAccountRepository accountRepo,
-                              IDeviceInfoRepository deviceInfoRepo,
-                              ISocialInfoRepository socialInfoRepo,
-                              AppDbContext db)
+        public AccountService(AccountRepository accountRepository)
         {
-            _accountRepo = accountRepo;
-            _deviceInfoRepo = deviceInfoRepo;
-            _socialInfoRepo = socialInfoRepo;
-            _db = db;
+            _accountRepository = accountRepository;
         }
 
-        public IEnumerable<AccountModel> GetAllAccounts()
+        public async Task<ApiResponse> GetAccountByEmail(string email)
         {
-            return _accountRepo.GetAll();
-        }
-
-        public IEnumerable<DeviceInfoModel> GetAllDeviceInfos()
-        {
-            return _deviceInfoRepo.GetAll();
-        }
-        
-        public IEnumerable<SocialInfoModel> GetAllSocialInfos()
-        {
-            return _socialInfoRepo.GetAll();
-        }
-
-        public async Task<ApiResponse> CreateAccountAsync(CreateAccountDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password)) {
+            var account = await _accountRepository.GetByEmail(email);
+            if (account == null)
+            {
                 return new ApiResponse(ErrorCode.InvalidInput);
             }
-            
-            if (await _db.Accounts.AnyAsync(a => a.Email == dto.Email))
+
+            return new ApiResponse(account);
+        }
+
+        public async Task<ApiResponse> GetAccountById(int id)
+        {
+            var account = await _accountRepository.GetById(id);
+            if (account == null)
+            {
+                return new ApiResponse(ErrorCode.InvalidInput);
+            }
+
+            return new ApiResponse(account);
+        }
+        public async Task<ApiResponse> GetAllAccounts()
+        {
+            var accounts = await _accountRepository.GetAll();
+            return new ApiResponse(accounts);
+        }
+
+        public async Task<ApiResponse> CreateAccount(CreateAccountDto dto)
+        {
+            if (await _accountRepository.GetByEmail(dto.Email) != null)
             {
                 return new ApiResponse(ErrorCode.EmailAlreadyExists);
             }
 
-            _db.Accounts.Add(new AccountModel
+            var model = new AccountModel
             {
                 Email = dto.Email,
                 Password = dto.Password
-            });
-            await _db.SaveChangesAsync();
+            };
 
+            await _accountRepository.Add(model);
+            await _accountRepository.SaveChanges();
             return ApiResponse.SUCCESS;
         }
     }
